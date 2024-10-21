@@ -5,7 +5,7 @@ import EventTicketSystemABI from '../contracts/EventTicketSystem.json';
 import EventFactoryABI from '../contracts/EventFactory.json';
 import Web3 from 'web3';
 
-const MARKETPLACE_ADDRESS = '0x430Ca916d02128A393aE0cE88a6e8450035AE838'; // Your TicketMarketplace contract address
+const MARKETPLACE_ADDRESS = '0x4b0864e55616b4aa2bFeFAedDA73c01565651033'; // Your TicketMarketplace contract address
 const FEE_RECEIVER_ADDRESS = '0x295c3A0D84Ed4cBEae881C2fc58B23d59d604ee2'; // Replace with your actual fee receiver address
 const eventFactoryAddress = '0x1920De7F459cb722Ba31D7eeD05B1a4f05D23e7e'; // Your EventFactory address
 
