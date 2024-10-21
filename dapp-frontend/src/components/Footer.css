@@ -1,0 +1,16 @@
+.footer {
+    background-color: #001b5e; /* Example background color */
+    color: white; /* Text color */
+    padding: 20px; /* Spacing */
+    text-align: center; /* Center text */
+}
+
+.footer-content {
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-between; /* Space out items */
+    align-items: center; /* Center items vertically */
+}
+
+.footer-title {
+    font-weight: bold; /* Make the title bold */
+}
