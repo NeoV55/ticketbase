@@ -1,6 +1,6 @@
 
 # TicketBase - End Product
-##
+
 ## To Start local development and interact on Base-Sepolia 
 ```
 git clone https://github.com/NeoV55/ticketbase.git
