@@ -1,0 +1,118 @@
+/* Base Styles */
+body {
+    font-family: 'Coinbase_Display-Bold-web'; /* Use your custom font here */
+    margin: 0;
+    padding: 0;
+    background-color: #f5f7fa; /* Light background for contrast */
+    color: #0052cc; /* Default text color */
+}
+
+/* Container Styles */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: #0052cc; /* Coinbase blue */
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+/* Button Styles */
+.btn {
+    background-color: #0052cc; /* Coinbase blue */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0052cc; /* Darker shade on hover */
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd; /* Light gray border */
+}
+
+.table th {
+    background-color: #0052cc; /* Table header background */
+    color: white;
+}
+
+/* Input Styles */
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+/* Heading Styles */
+h1, h2, h3 {
+    color: #0052cc; /* Heading color */
+}
+
+h2 {
+    margin-top: 20px;
+}
+
+/* Utility Classes */
+.text-center {
+    text-align: center;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .table th, .table td {
+        display: block; /* Stack table cells on smaller screens */
+    }
+}
+
+/* Style inputs and buttons in the same column */
+td input, td button {
+    display: block;
+    margin-bottom: 5px; /* Add some space between inputs/buttons */
+    width: 100%; /* Make them fill the column width */
+  }
+  
+  /* Style button area */
+  td button {
+    width: auto;
+    margin-top: 10px; /* Add some space between buttons */
+}
+  

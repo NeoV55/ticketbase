@@ -1,0 +1,32 @@
+/* Footer.css */
+.footer {
+    background-color: #0052cc;
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    position: fixed;
+
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer-text {
+    margin: 0;
+    font-size: 16px;
+}
+
+.social-icons {
+    margin-top: 0px;
+}
+
+.social-icons a {
+    color: #fff;
+    font-size: 24px;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.social-icons a:hover {
+    color: #4CAF50; /* Change this to any color you like for hover effect */
+}
