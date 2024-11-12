@@ -4,7 +4,7 @@ import AttendanceContractABI from '../contracts/NewEventAttendance.json';
 import EventTicketSystemABI from '../contracts/EventTicketSystem.json';
 import Web3 from 'web3';
 
-const ATTENDANCE_CONTRACT_ADDRESS = '0xc7380b030af507151006a10c6537283442082f2B'; // Your Attendance contract address
+const ATTENDANCE_CONTRACT_ADDRESS = '0xc7380b030af507151006a10c6537283442082f2B';
 
 const AttendanceBasePage = () => {
   const [events, setEvents] = useState([]);
@@ -18,34 +18,43 @@ const AttendanceBasePage = () => {
       const accounts = await web3.eth.getAccounts();
       setAccount(accounts[0]);
 
-      const attendanceContract = new web3.eth.Contract(AttendanceContractABI.abi, ATTENDANCE_CONTRACT_ADDRESS);
+      const attendanceContract = new web3.eth.Contract(
+        AttendanceContractABI.abi,
+        ATTENDANCE_CONTRACT_ADDRESS
+      );
 
       try {
         const allEvents = await attendanceContract.methods.getAllEvents().call();
         console.log('All Events:', allEvents);
 
-        // Fetch event names and attendance status
-        const eventsWithDetails = await Promise.all(allEvents.ids.map(async (eventId, index) => {
-          const eventSystemContract = new web3.eth.Contract(EventTicketSystemABI.abi, allEvents.contracts[index]);
-          const eventName = await eventSystemContract.methods.name().call();
+        // Fetch each event's name and attendance status one by one
+        for (let i = 0; i < allEvents.ids.length; i++) {
+          const eventId = allEvents.ids[i];
+          const eventAddress = allEvents.contracts[i];
 
-          // Call attendance status function
-          const attendanceStatus = await attendanceContract.methods.attendance(account, eventId).call();
+          try {
+            const eventSystemContract = new web3.eth.Contract(EventTicketSystemABI.abi, eventAddress);
+            const eventName = await eventSystemContract.methods.name().call();
+            const attendanceStatus = await attendanceContract.methods.attendance(account, eventId).call();
 
-          return {
-            id: eventId.toString(),
-            contractAddress: allEvents.contracts[index],
-            name: eventName,
-            status: attendanceStatus ? 'Verified' : 'None'
-          };
-        }));
+            const eventDetail = {
+              id: eventId.toString(),
+              contractAddress: eventAddress,
+              name: eventName,
+              status: attendanceStatus ? 'Verified' : 'None',
+            };
 
-        setEvents(eventsWithDetails);
+            // Add each event to the state as it loads
+            setEvents((prevEvents) => [eventDetail, ...prevEvents]);
+          } catch (error) {
+            console.error(`Error fetching details for event ID: ${eventId}`, error);
+          }
+        }
       } catch (error) {
         console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     loadEvents();
@@ -59,7 +68,10 @@ const AttendanceBasePage = () => {
 
     try {
       const web3 = new Web3(window.ethereum);
-      const attendanceContract = new web3.eth.Contract(AttendanceContractABI.abi, ATTENDANCE_CONTRACT_ADDRESS);
+      const attendanceContract = new web3.eth.Contract(
+        AttendanceContractABI.abi,
+        ATTENDANCE_CONTRACT_ADDRESS
+      );
 
       await attendanceContract.methods.verifyAttendance(eventId).send({ from: account });
       alert('Attendance verified successfully!');
@@ -73,7 +85,7 @@ const AttendanceBasePage = () => {
     <div className="container">
       <Navbar />
       <h1>Attendance Verification</h1>
-      {loading ? (
+      {loading && events.length === 0 ? (
         <p>Loading events...</p>
       ) : (
         <>
@@ -89,14 +101,17 @@ const AttendanceBasePage = () => {
               </tr>
             </thead>
             <tbody>
-              {events.slice().reverse().map((event, index) => (
+              {events.map((event, index) => (
                 <tr key={index}>
                   <td>{event.name}</td>
                   <td>{event.id}</td>
                   <td>{event.contractAddress}</td>
                   <td>{event.status}</td>
                   <td>
-                    <button className="btn btn-primary" onClick={() => handleVerifyAttendance(event.id)}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleVerifyAttendance(event.id)}
+                    >
                       Verify Attendance
                     </button>
                   </td>
@@ -104,6 +119,7 @@ const AttendanceBasePage = () => {
               ))}
             </tbody>
           </table>
+          {loading && <p>Loading more events...</p>}
         </>
       )}
     </div>
