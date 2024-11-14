@@ -113,7 +113,7 @@ const EventBasePage = () => {
             <th>Event Name</th>
             <th>Mint Ticket</th>
             <th>Transfer Ticket</th>
-            <th>Set Approval For All</th>
+            <th>Set Approval For Marketplace</th>
           </tr>
         </thead>
         <tbody>
