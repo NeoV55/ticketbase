@@ -17,14 +17,16 @@ const HomeBasePage = () => {
 
         // Get the deployed event addresses from the factory
         const deployedEventAddresses = await factoryContract.methods.getDeployedEvents().call();
-        const eventDetailsPromises = deployedEventAddresses.map(async (eventAddress) => {
+
+        for (const eventAddress of deployedEventAddresses) {
           const eventContract = new web3.eth.Contract(EventTicketSystemABI.abi, eventAddress);
-          
+
+          // Fetch event details
           const name = await eventContract.methods.name().call();
           const location = await eventContract.methods.location().call();
           const symbol = await eventContract.methods.symbol().call();
           const totalTickets = await eventContract.methods.totalTickets().call();
-          const ticketsMinted = await eventContract.methods.ticketsMinted().call(); // Fetch tickets minted
+          const ticketsMinted = await eventContract.methods.ticketsMinted().call();
 
           const startDateBigInt = await eventContract.methods.startDate().call();
           const endDateBigInt = await eventContract.methods.endDate().call();
@@ -32,22 +34,19 @@ const HomeBasePage = () => {
           const formattedStartDate = new Date(Number(startDateBigInt) * 1000).toLocaleString();
           const formattedEndDate = new Date(Number(endDateBigInt) * 1000).toLocaleString();
 
-          return {
+          const newEvent = {
             name,
             location,
             symbol,
             totalTickets: totalTickets.toString(),
-            ticketsMinted: ticketsMinted.toString(), // Store tickets minted
+            ticketsMinted: ticketsMinted.toString(),
             startDate: formattedStartDate,
             endDate: formattedEndDate,
           };
-        });
 
-        // Fetch all event details
-        const eventsData = await Promise.all(eventDetailsPromises);
-
-        // Reverse the order to show latest events first
-        setEvents(eventsData.reverse());
+          // Add each event as soon as it is loaded
+          setEvents((prevEvents) => [newEvent, ...prevEvents]);
+        }
       } catch (err) {
         console.error("Error loading events:", err);
         setError("Failed to load events. Please check the console for more details.");
@@ -62,9 +61,7 @@ const HomeBasePage = () => {
   return (
     <div className="container">
       <h1>All Events</h1>
-      {loading ? (
-        <p>Loading events...</p>
-      ) : error ? (
+      {error ? (
         <p>{error}</p>
       ) : (
         <table className="table">
@@ -74,19 +71,20 @@ const HomeBasePage = () => {
               <th>Location</th>
               <th>Symbol</th>
               <th>Tickets Available</th>
-              <th>Tickets Minted</th> {/* New column for tickets minted */}
+              <th>Tickets Minted</th>
               <th>Start Date</th>
               <th>End Date</th>
             </tr>
           </thead>
           <tbody>
+            {events.length === 0 && loading && <tr><td colSpan="7">Loading events...</td></tr>}
             {events.map((event, index) => (
               <tr key={index}>
                 <td>{event.name}</td>
                 <td>{event.location}</td>
                 <td>{event.symbol}</td>
                 <td>{event.totalTickets}</td>
-                <td>{event.ticketsMinted}</td> {/* Display tickets minted */}
+                <td>{event.ticketsMinted}</td>
                 <td>{event.startDate}</td>
                 <td>{event.endDate}</td>
               </tr>

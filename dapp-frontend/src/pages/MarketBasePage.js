@@ -16,7 +16,6 @@ const MarketBasePage = () => {
     const [price, setPrice] = useState('');
 
     useEffect(() => {
-        // Load wallet and marketplace data when component mounts
         const loadWalletData = async () => {
             try {
                 const web3 = new Web3(window.ethereum);
@@ -41,52 +40,41 @@ const MarketBasePage = () => {
         loadWalletData();
     }, []);
 
-    // Load active listings with event names and prices
     const loadListings = async (web3) => {
         try {
             const contract = new web3.eth.Contract(TicketMarketplaceABI.abi, MARKETPLACE_ADDRESS);
             const items = await contract.methods.getAllActiveListings().call();
 
-            const transformedListings = await Promise.all(
-                items.map(async ({ nftContract, tokenId }) => {
-                    let priceInWei = '0';
-                    let eventName = '';
+            items.forEach(async ({ nftContract, tokenId }) => {
+                try {
+                    const listingData = await contract.methods.listings(nftContract, tokenId).call();
+                    if (!listingData.isActive) return;
 
-                    try {
-                        const listingData = await contract.methods.listings(nftContract, tokenId).call();
+                    const priceInWei = listingData.price;
+                    const price = parseFloat(web3.utils.fromWei(priceInWei, 'ether')).toString();
 
-                        if (!listingData.isActive) return null;
+                    const eventContract = new web3.eth.Contract(EventTicketSystemABI.abi, nftContract);
+                    const eventName = await eventContract.methods.name().call();
 
-                        priceInWei = listingData.price;
-                        //const price = web3.utils.fromWei(priceInWei, 'ether');
-                        const price = parseFloat(web3.utils.fromWei(priceInWei, 'ether')).toString();
+                    const newListing = {
+                        contractAddress: nftContract,
+                        tokenId,
+                        price,
+                        eventName,
+                    };
 
-                        
-
-                        const eventContract = new web3.eth.Contract(EventTicketSystemABI.abi, nftContract);
-                        eventName = await eventContract.methods.name().call();
-
-                        return {
-                            contractAddress: nftContract,
-                            tokenId,
-                            price,
-                            eventName,
-                        };
-                    } catch (error) {
-                        console.error(`Error fetching details for contract: ${nftContract}, Token ID: ${tokenId}`, error);
-                        return null;
-                    }
-                })
-            );
-
-            setListings(transformedListings.filter(Boolean));
+                    // Add each listing as soon as it is loaded
+                    setListings((prevListings) => [...prevListings, newListing]);
+                } catch (error) {
+                    console.error(`Error fetching details for contract: ${nftContract}, Token ID: ${tokenId}`, error);
+                }
+            });
         } catch (error) {
             console.error("Error loading listings:", error);
             alert("Error loading listings, please try again later.");
         }
     };
 
-    // Fetch owned tickets for the connected user
     const fetchOwnedTickets = async (web3, events, user) => {
         const tickets = [];
 
@@ -110,7 +98,6 @@ const MarketBasePage = () => {
         return tickets;
     };
 
-    // Handle listing an NFT
     const handleListNft = async () => {
         if (!selectedNft.contractAddress || !selectedNft.tokenId || !price) {
             alert("Please fill in all fields.");
@@ -124,7 +111,6 @@ const MarketBasePage = () => {
 
             const contract = new web3.eth.Contract(TicketMarketplaceABI.abi, MARKETPLACE_ADDRESS);
             const priceInWei = web3.utils.toWei(price, 'ether');
-            
 
             await contract.methods.listTicket(selectedNft.contractAddress, selectedNft.tokenId, priceInWei).send({ from: currentAccount });
             alert("Ticket listed successfully!");
@@ -135,57 +121,44 @@ const MarketBasePage = () => {
         }
     };
 
-
-    // Function to handle buy action
     const handleBuy = async (item) => {
         try {
             const web3 = new Web3(window.ethereum);
             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
             const currentAccount = accounts[0];
-
             const contract = new web3.eth.Contract(TicketMarketplaceABI.abi, MARKETPLACE_ADDRESS);
 
-            // Check if price is a valid number
-            const priceInEth = parseFloat(item.price); // Convert to a number for comparison
-
-            // Handle extremely small prices
+            const priceInEth = parseFloat(item.price);
             if (isNaN(priceInEth) || priceInEth <= 0) {
                 alert("Invalid ticket price.");
                 return;
             }
 
-            // Minimum price threshold (for example, 0.0001 ETH)
             const minPriceThreshold = 0.0001;
-
             if (priceInEth < minPriceThreshold) {
                 alert(`The price of the ticket is too low to process the transaction.`);
                 return;
             }
 
-            // Convert price to Wei
-            const priceInWei = web3.utils.toWei(priceInEth.toString(), 'ether'); 
-
-            // Call buyTicket with the contract address and tokenId
+            const priceInWei = web3.utils.toWei(priceInEth.toString(), 'ether');
             await contract.methods.buyTicket(item.contractAddress, item.tokenId).send({
                 from: currentAccount,
-                value: priceInWei
+                value: priceInWei,
             });
 
             alert("Ticket purchased successfully!");
-            loadListings(web3); // Reload listings after purchase
+            loadListings(web3);
         } catch (error) {
             console.error("Error purchasing ticket:", error);
             alert("Transaction failed! Please check console for details.");
         }
     };
 
-
-
     return (
         <div className="container">
             <Navbar />
             <h1>Marketplace</h1>
-            {loading ? (
+            {loading && listings.length === 0 ? (
                 <p>Loading listings...</p>
             ) : (
                 <>

@@ -20,46 +20,56 @@ import './styles.css';
 function App() {
   const [account, setAccount] = useState('');
   const [web3, setWeb3] = useState(null);
-  
 
-  
+  const customRpcUrl = 'https://base-sepolia.blockpi.network/v1/rpc/public'; // Replace with your custom RPC URL
 
   // MetaMask connection and network setup
   const connectWallet = async () => {
     const provider = await detectEthereumProvider();
-    if (provider) {
-      const web3Instance = new Web3(provider);
-      setWeb3(web3Instance);
+    let web3Instance;
 
+    if (provider) {
+      // Use MetaMask's provider
+      web3Instance = new Web3(provider);
       try {
         const accounts = await web3Instance.eth.requestAccounts();
         setAccount(accounts[0]);
 
-        // Optionally switch to the Base chain network
+        // Optionally switch to the desired network
         await provider.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x14a34' }], // Example chain ID, replace with Base chain ID if different
+          params: [{ chainId: '0x14a34' }], // Replace with your target chain ID if needed
         });
       } catch (error) {
         console.error('Error connecting to MetaMask:', error);
       }
     } else {
-      alert('MetaMask is not installed. Please install it to use this dApp.');
+      // Fallback to custom RPC if MetaMask is not available
+      web3Instance = new Web3(new Web3.providers.HttpProvider(customRpcUrl));
+      console.log('Using custom RPC provider');
     }
-  };
 
-  
+    setWeb3(web3Instance);
+  };
 
   useEffect(() => {
     // Auto-connect to MetaMask if already connected
     const checkWalletConnection = async () => {
       const provider = await detectEthereumProvider();
+      let web3Instance;
+
       if (provider) {
+        web3Instance = new Web3(provider);
         const accounts = await provider.request({ method: 'eth_accounts' });
         if (accounts.length > 0) {
           setAccount(accounts[0]);
         }
+      } else {
+        // Initialize with custom RPC if MetaMask is not found
+        web3Instance = new Web3(new Web3.providers.HttpProvider(customRpcUrl));
       }
+
+      setWeb3(web3Instance);
     };
     checkWalletConnection();
   }, []);
@@ -111,6 +121,5 @@ function App() {
     </Router>
   );
 }
-
 
 export default App;
