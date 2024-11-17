@@ -44,9 +44,9 @@ For a comprehensive understanding of how to interact with the TicketBase DApp, w
 - [Interactive Demo](link-to-interactive-demo): Try out TicketBase in a simulated environment to get hands-on experience before interacting with the live DApp.
 
 Resources Links :
-- [TicketBase Video Guide on YouTube](link-to-video)
-- [TicketBase User Interaction Documentation](link-to-video)
-- [TicketBase MVP Prototype WebSite](https://ticketbase-sigma.vercel.app/)
+- **[TicketBase Video Guide on YouTube](link-to-video)**
+- **[TicketBase User Interaction Documentation](link-to-video)**
+- **[TicketBase MVP Prototype WebSite](https://ticketbase-sigma.vercel.app/)**
 
 
 These resources are designed to guide you through every step of using and contributing to TicketBase, ensuring an intuitive and seamless experience. Should you need further assistance, feel free to open an issue or consult the community.
